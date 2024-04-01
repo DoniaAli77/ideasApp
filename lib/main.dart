@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import './IdeasScreen.dart';
 import './AddIdeaScreen.dart';
 import './ideasProvider.dart';
-import 'package:provider/provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (ctx) => IdeasProvider(),
       child: MaterialApp(
-          title: 'Flutter Demo',
+          title: 'Ideas App',
           theme: ThemeData(
             primarySwatch: Colors.deepOrange,
           ),

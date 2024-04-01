@@ -16,6 +16,7 @@ class IdeasScreen extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: Text('Ideas'),
+          backgroundColor: Colors.deepOrange,
           actions: [
             IconButton(
                 onPressed: () {
@@ -27,17 +28,24 @@ class IdeasScreen extends StatelessWidget {
         body: ListView.builder(
             itemCount: ideas.length,
             itemBuilder: (ctx, index) {
-              return ListTile(
-                title: Text(ideas[index].ideaTitle),
-                subtitle: Text(ideas[index].ideaBody),
-                trailing: IconButton(
-                  onPressed: () {
-                    ideasProvider.deleteIdea(ideas[index].id);
-                  },
-                  icon: Icon(
+              return Dismissible(
+                key: ValueKey(ideas[index].id),
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: EdgeInsets.only(right: 20),
+                  color: Colors.red,
+                  child: Icon(
                     Icons.delete,
-                    color: Colors.red,
+                    color: Colors.white,
                   ),
+                ),
+                direction: DismissDirection.endToStart,
+                onDismissed: (dir) {
+                  ideasProvider.deleteIdea(ideas[index].id);
+                },
+                child: ListTile(
+                  title: Text(ideas[index].ideaTitle),
+                  subtitle: Text(ideas[index].ideaBody),
                 ),
               );
             }));

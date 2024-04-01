@@ -1,6 +1,5 @@
 import './idea.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class IdeasProvider with ChangeNotifier {
   List<Idea> _ideas = [];

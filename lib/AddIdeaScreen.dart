@@ -13,6 +13,7 @@ class AddIdeaScreen extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: Text("Add new idea"),
+          backgroundColor: Colors.deepOrange,
           actions: [
             IconButton(
                 onPressed: () {
