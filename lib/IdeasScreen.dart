@@ -19,12 +19,14 @@ class _IdeasScreenState extends State<IdeasScreen> {
     try {
       var response = await http.get(ideasURL);
       var fetchedData = json.decode(response.body) as Map<String, dynamic>;
-      _ideas.clear();
-      fetchedData.forEach((key, value) {
-        _ideas.add(Idea(
-            id: key,
-            ideaTitle: value['ideaTitle'],
-            ideaBody: value['ideaBody']));
+      setState(() {
+        _ideas.clear();
+        fetchedData.forEach((key, value) {
+          _ideas.add(Idea(
+              id: key,
+              ideaTitle: value['ideaTitle'],
+              ideaBody: value['ideaBody']));
+        });
       });
     } catch (err) {
       print(err);
@@ -37,10 +39,13 @@ class _IdeasScreenState extends State<IdeasScreen> {
     try {
       await http
           .delete(ideaToDeleteURL); // wait for the delete request to be done
-      _ideas.removeWhere((element) {
+          setState(() {
+             _ideas.removeWhere((element) {
         // when done, remove it locally.
         return element.id == id_to_delete;
       });
+          });
+     
     } catch (err) {
       print(err);
     }
@@ -54,7 +59,7 @@ class _IdeasScreenState extends State<IdeasScreen> {
 
   @override
   Widget build(BuildContext context) {
-    fetchIdeasFromServer();
+    // fetchIdeasFromServer();
     return Scaffold(
         appBar: AppBar(
           title: Text('Ideas'),
