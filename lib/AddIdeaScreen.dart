@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-import 'ideasProvider.dart';
+import 'idea.dart';
 
 class AddIdeaScreen extends StatefulWidget {
   @override
@@ -12,10 +13,25 @@ class _AddIdeaScreenState extends State<AddIdeaScreen> {
   final titleValue = TextEditingController();
   final ideaValue = TextEditingController();
   var isLoading = false;
+  List<Idea> _ideas = [];
+  final ideasURL = Uri.parse(
+      'https://lab5-ce32f-default-rtdb.firebaseio.com/IdeasFirebase.json'); // will be different in your case!!
+//--------------------------------------------------------
+  Future<void> addIdea(String t, String b) {
+    return http
+        .post(ideasURL, body: json.encode({'ideaTitle': t, 'ideaBody': b}))
+        .then((response) {
+      _ideas.add(Idea(
+          id: json.decode(response.body)['name'], ideaTitle: t, ideaBody: b));
+    }).catchError((err) {
+      print("provider:" + err.toString());
+      throw err;
+    });
+  }
+
+  //---------------------------------------------------------
   @override
   Widget build(BuildContext context) {
-    // accessing the provider to grab data
-    final ideasProvider = Provider.of<IdeasProvider>(context, listen: false);
     return Scaffold(
         appBar: AppBar(
           title: Text("Add new idea"),
@@ -26,20 +42,18 @@ class _AddIdeaScreenState extends State<AddIdeaScreen> {
                   setState(() {
                     isLoading = true;
                   });
-                  ideasProvider
-                      .addIdea(
+                  addIdea(
                     titleValue.text,
                     ideaValue.text,
-                  )
-                      .catchError((err) {
+                  ).catchError((err) {
                     return showDialog<Null>(
                       context: context,
                       builder: (ctx) => AlertDialog(
-                        title: Text('An error occurred!'),
+                        title: const Text('An error occurred!'),
                         content: Text(err.toString()),
                         actions: [
                           TextButton(
-                            child: Text('Okay'),
+                            child: const Text('Okay'),
                             onPressed: () {
                               Navigator.of(ctx).pop();
                             },
@@ -56,23 +70,23 @@ class _AddIdeaScreenState extends State<AddIdeaScreen> {
                   // even if our future<void> returns void, the anonymous function
                   //still requires this as a format so we put an underscore as convention
                 },
-                icon: Icon(Icons.check)),
+                icon: const Icon(Icons.check)),
           ],
         ),
         body: isLoading
-            ? Center(
+            ? const Center(
                 child: CircularProgressIndicator(),
               )
             : Container(
-                margin: EdgeInsets.all(10),
+                margin: const EdgeInsets.all(10),
                 child: Column(
                   children: [
                     TextField(
-                      decoration: InputDecoration(labelText: 'Idea title'),
+                      decoration: const InputDecoration(labelText: 'Idea title'),
                       controller: titleValue,
                     ),
                     TextField(
-                        decoration: InputDecoration(labelText: 'Idea'),
+                        decoration: const InputDecoration(labelText: 'Idea'),
                         controller: ideaValue),
                   ],
                 ),

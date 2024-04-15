@@ -1,6 +1,8 @@
-import 'ideasProvider.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+import 'idea.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class IdeasScreen extends StatefulWidget {
   @override
@@ -8,23 +10,51 @@ class IdeasScreen extends StatefulWidget {
 }
 
 class _IdeasScreenState extends State<IdeasScreen> {
+  List<Idea> _ideas = [];
+  final ideasURL = Uri.parse(
+      'https://lab5-ce32f-default-rtdb.firebaseio.com/IdeasFirebase.json'); // will be different in your case!!
+
+  // --------------------------------------------
+  Future<void> fetchIdeasFromServer() async {
+    try {
+      var response = await http.get(ideasURL);
+      var fetchedData = json.decode(response.body) as Map<String, dynamic>;
+      _ideas.clear();
+      fetchedData.forEach((key, value) {
+        _ideas.add(Idea(
+            id: key,
+            ideaTitle: value['ideaTitle'],
+            ideaBody: value['ideaBody']));
+      });
+    } catch (err) {
+      print(err);
+    }
+  }
+
+  void deleteIdea(String id_to_delete) async {
+    var ideaToDeleteURL = Uri.parse(
+        'https://lab5-ce32f-default-rtdb.firebaseio.com/IdeasFirebase/$id_to_delete.json');
+    try {
+      await http
+          .delete(ideaToDeleteURL); // wait for the delete request to be done
+      _ideas.removeWhere((element) {
+        // when done, remove it locally.
+        return element.id == id_to_delete;
+      });
+    } catch (err) {
+      print(err);
+    }
+  }
+
+  // ------------------------------------------
   void initState() {
-    var myProvider =
-        Provider.of<IdeasProvider>(context, listen: false); // should be
-//false to be called from initstate
-    myProvider.fetchIdeasFromServer();
+    fetchIdeasFromServer();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // accessing the provider to grab data
-    final ideasProvider = Provider.of<IdeasProvider>(context,
-        listen: true); // listening is true by
-//default
-    // the provider contains the data + additional methods. if we need only the
-//data, we must call the getter
-    final ideas = ideasProvider.getAllIdeas; // calling the getter
+    fetchIdeasFromServer();
     return Scaffold(
         appBar: AppBar(
           title: Text('Ideas'),
@@ -38,12 +68,12 @@ class _IdeasScreenState extends State<IdeasScreen> {
           ],
         ),
         body: RefreshIndicator(
-          onRefresh: ideasProvider.fetchIdeasFromServer,
+          onRefresh: () => fetchIdeasFromServer(),
           child: ListView.builder(
-              itemCount: ideas.length,
+              itemCount: _ideas.length,
               itemBuilder: (ctx, index) {
                 return Dismissible(
-                  key: ValueKey(ideas[index].id),
+                  key: ValueKey(_ideas[index].id),
                   background: Container(
                     alignment: Alignment.centerRight,
                     padding: EdgeInsets.only(right: 20),
@@ -55,11 +85,11 @@ class _IdeasScreenState extends State<IdeasScreen> {
                   ),
                   direction: DismissDirection.endToStart,
                   onDismissed: (dir) {
-                    ideasProvider.deleteIdea(ideas[index].id);
+                    deleteIdea(_ideas[index].id);
                   },
                   child: ListTile(
-                    title: Text(ideas[index].ideaTitle),
-                    subtitle: Text(ideas[index].ideaBody),
+                    title: Text(_ideas[index].ideaTitle),
+                    subtitle: Text(_ideas[index].ideaBody),
                   ),
                 );
               }),
