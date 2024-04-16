@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
           ),
           initialRoute: '/',
           routes: {
-            '/': (ctx) => IdeasScreen(),
+            '/': (ctx) => IdeasScreenHook(),
             '/AddIdeaRoute': (ctx) => AddIdeaScreen(),
           });
     

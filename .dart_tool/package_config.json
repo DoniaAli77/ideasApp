@@ -44,6 +44,12 @@
       "languageVersion": "3.2"
     },
     {
+      "name": "flutter_hooks",
+      "rootUri": "file:///C:/Users/Eng.Donia/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_hooks-0.20.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "flutter_lints",
       "rootUri": "file:///C:/Users/Eng.Donia/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-2.0.3",
       "packageUri": "lib/",
@@ -176,7 +182,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2024-04-02T13:14:47.909682Z",
+  "generated": "2024-04-16T06:09:31.981099Z",
   "generator": "pub",
   "generatorVersion": "3.2.6"
 }
