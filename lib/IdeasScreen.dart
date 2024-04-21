@@ -1,103 +1,83 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-import 'idea.dart';
-import 'package:flutter/material.dart';
-
-class IdeasScreen extends StatefulWidget {
-  @override
-  _IdeasScreenState createState() => _IdeasScreenState();
-}
-
-class _IdeasScreenState extends State<IdeasScreen> {
-  List<Idea> _ideas = [];
-  final ideasURL = Uri.parse(
-      'https://lab5-ce32f-default-rtdb.firebaseio.com/IdeasFirebase.json'); // will be different in your case!!
-
-  // --------------------------------------------
-  Future<void> fetchIdeasFromServer() async {
-    try {
-      var response = await http.get(ideasURL);
-      var fetchedData = json.decode(response.body) as Map<String, dynamic>;
-      setState(() {
-        _ideas.clear();
-        fetchedData.forEach((key, value) {
-          _ideas.add(Idea(
-              id: key,
-              ideaTitle: value['ideaTitle'],
-              ideaBody: value['ideaBody']));
-        });
-      });
-    } catch (err) {
-      print(err);
-    }
-  }
-
-  void deleteIdea(String id_to_delete) async {
-    var ideaToDeleteURL = Uri.parse(
-        'https://lab5-ce32f-default-rtdb.firebaseio.com/IdeasFirebase/$id_to_delete.json');
-    try {
-      await http
-          .delete(ideaToDeleteURL); // wait for the delete request to be done
-          setState(() {
-             _ideas.removeWhere((element) {
-        // when done, remove it locally.
-        return element.id == id_to_delete;
-      });
-          });
+import 'package:flutter/material.dart'; 
+import 'package:provider/provider.dart'; 
+import 'authProvider.dart';
+import 'ideasProvider.dart'; 
+ 
+class IdeasScreen extends StatefulWidget { 
+  @override 
+  _IdeasScreenState createState() => _IdeasScreenState(); 
+} 
+ 
+class _IdeasScreenState extends State<IdeasScreen> { 
+ 
+void initState(){ 
+ var myProvider= Provider.of<IdeasProvider>(context,listen: false);  
+ var authProvider= Provider.of<AuthProvider>(context,listen: false); 
+ myProvider.fetchIdeasFromServer(authProvider.token); 
+ //myProvider.fetchMyIdeasFromServer(authProvider.token, authProvider.userId); 
+  super.initState(); 
+} 
+ 
+  @override 
+  Widget build(BuildContext context) { 
+    // accessing the provider to grab data 
+    final ideasProvider = 
+        Provider.of<IdeasProvider>(context, listen: true); // listening is true by default 
+var authProvider= Provider.of<AuthProvider>(context,listen: true); 
      
-    } catch (err) {
-      print(err);
-    }
-  }
-
-  // ------------------------------------------
-  void initState() {
-    fetchIdeasFromServer();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // fetchIdeasFromServer();
-    return Scaffold(
+    final ideas = ideasProvider.getAllIdeas; // calling the getter
+     return Scaffold( 
         appBar: AppBar(
-          title: Text('Ideas'),
-          backgroundColor: Colors.deepOrange,
-          actions: [
-            IconButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/AddIdeaRoute');
-                },
-                icon: Icon(Icons.add))
-          ],
-        ),
-        body: RefreshIndicator(
-          onRefresh: () => fetchIdeasFromServer(),
-          child: ListView.builder(
-              itemCount: _ideas.length,
-              itemBuilder: (ctx, index) {
-                return Dismissible(
-                  key: ValueKey(_ideas[index].id),
-                  background: Container(
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(right: 20),
-                    color: Colors.red,
-                    child: Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                    ),
-                  ),
-                  direction: DismissDirection.endToStart,
-                  onDismissed: (dir) {
-                    deleteIdea(_ideas[index].id);
-                  },
-                  child: ListTile(
-                    title: Text(_ideas[index].ideaTitle),
-                    subtitle: Text(_ideas[index].ideaBody),
-                  ),
-                );
-              }),
-        ));
-  }
-}
+          backgroundColor: Colors.deepPurple, 
+          title: Text('Ideas',style: TextStyle(color: Colors.white),), 
+          actions: [ 
+            IconButton( 
+              color: Colors.white,
+                onPressed: () { 
+                  Navigator.of(context).pushNamed('/AddIdeaRoute'); 
+                }, 
+                icon: Icon(Icons.add)), 
+                IconButton(
+                   color: Colors.white,
+                  onPressed: () 
+                {authProvider.logout(); 
+                 
+                Navigator.of(context).pushReplacementNamed('/'); },  
+                icon: Icon(Icons.logout_rounded)) 
+          ], 
+        ), 
+        body: RefreshIndicator( 
+          //onRefresh: () => ideasProvider.fetchMyIdeasFromServer(authProvider.token, authProvider.userId), 
+          onRefresh: () => ideasProvider.fetchIdeasFromServer(authProvider.token), 
+ 
+          //onRefresh:; 
+          child: ListView.builder( 
+              itemCount: ideas.length, 
+              itemBuilder: (ctx, index) { 
+                return Dismissible( 
+                   
+                  key: ValueKey(ideas[index].id), 
+                  background: Container( 
+                    alignment: Alignment.centerRight, 
+                    padding: EdgeInsets.only(right: 20), 
+                    color: Colors.red, 
+                    child: Icon( 
+                      Icons.delete, 
+                      color: Colors.white, 
+                    ), 
+                  ), 
+                  direction: DismissDirection.endToStart, 
+                  onDismissed: (dir) { 
+                    ideasProvider.deleteIdea(ideas[index].id, authProvider.token); 
+                  }, 
+                  child: ListTile( 
+                     
+                    title: Text(ideas[index].ideaTitle +" By "+ 
+ideas[index].userId), 
+                    subtitle: Text(ideas[index].ideaBody),  ), 
+                ); 
+              }), 
+        )); 
+  } 
+} 
+
