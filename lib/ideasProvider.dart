@@ -48,7 +48,7 @@ class IdeasProvider with ChangeNotifier {
       _ideas.removeWhere((element) {
         // when done, remove it locally.
         return element.id == id_to_delete;
-      });
+      });// we can use removeAt(index) function
       notifyListeners(); // to update our list without the need to refresh
     } catch (err) {}
   }
