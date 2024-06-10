@@ -39,7 +39,7 @@ class IdeasProvider with ChangeNotifier {
     return _ideas;
   }
 
-  void deleteIdea(String id_to_delete) async {
+  Future<void> deleteIdea(String id_to_delete) async {
     var ideaToDeleteURL = Uri.parse(
         'https://lab5-ce32f-default-rtdb.firebaseio.com/IdeasFirebase/$id_to_delete.json');
     try {
